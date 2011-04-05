@@ -1,0 +1,1 @@
+This application aims at the development of Nagios plugins using the python language and communication protocol SMNP (www.net-snmp.org) as transport.
