@@ -2,13 +2,19 @@ This application aims at the development of Nagios plugins using the python lang
 and communication protocol SMNP (www.net-snmp.org) as transport.
 
 1. Install dependencies (debian)
+	
+	No depencis for yet
 
-	1.1 apt-get install build-essential python-setuptools python-distutils-extra 
-	    python-dev
-	1.2 ldconfig
-	1.3 Download the latest version of the sources of SNMP in 
-	    http://sourceforge.net/projects/net-snmp/files/net-snmp/
-	1.4 Recommended: Unzip and then compile with option "--with-python-modules"
-	    OR: go to the python directory contained in the root directory and then 
-	        follow the instructions in the README file 
-	1.5 have a fun.
+
+2. Roadmap
+	version 0.1 - The core
+	version 0.2 - Iface plugin
+	version 0.3 - Memory plugin
+	version 0.4 - Disk Plugin
+	version 0.5 - LaLoad/CPU Plugin
+	version 0.6 - DiskIO plugin
+	version 0.7 - process (memory use, number of process and cpu usage) plugin
+	version 0.8 - LMSensors Plugin
+	version 0.9 - printer plugin
+	version 1.0 - all the plugins revision
+	version ....
