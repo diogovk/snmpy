@@ -6,6 +6,7 @@ and communication protocol SMNP (www.net-snmp.org) as transport.
 	Python -> http://www.python.org
 	SNMP   -> http://www.net-snmp.org
 
+
 2. Roadmap
 	version 0.1 - The core
 	version 0.2 - Iface plugin
