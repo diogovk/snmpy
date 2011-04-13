@@ -10,16 +10,21 @@ class Snmpy(object):
     """
 
     def __init__(self, dest_host, community, version="2c"):
-        self.dest_host = dest_host
-        self.community = community
-        self.version = version
+            self._dest_host = dest_host
+            self._community = community
+            self._version = version
     
-    def _filter(self, text):
+
+    def _filter(self, text, first_value=True):
         """
         Regular expression to agregate the values
         """
         result = dict()
-        pattern = re.compile('(?P<group>\w+)\.(?P<index>\d+) = (?P<type>\w+): (?P<value>\w+)')
+        if first_value:
+            pattern = re.compile('(?P<group>\w+)\.(?P<index>\d+) = (?P<type>\w+): (?P<value>[\:\/\w]+)')
+        else:
+            pattern = re.compile('(?P<group>\w+)\.(?P<index>\d+) = (?P<type>\w+): (?P<value>.+)')
+    
         for i in range(len(text)):
             line_search = pattern.search(text[i])
             try:
@@ -31,18 +36,29 @@ class Snmpy(object):
         return result
 
 
-    def walk(self, oid):
+    def walk(self, oid, first_value=True):
         """
         Basic class to execute SNMPWALK
         """
+        result = os.popen("snmpwalk -Os -v" + self._version + " -c " +
+            self._community + " " + self._dest_host + " " +
+            oid + " 2&>/dev/null").read().split("\n")
+        
+        return self._filter(result, only_value)
 
-        result = os.popen("snmpwalk -Os -v" + self.version + " -c " +
-                self.community + " " + self.dest_host + " " +
-                oid).read().split("\n")
 
-        return self._filter(result)
-                   
+    def get(self, oid, first_value=True):
+        """
+        Basic class to execute SNMPGET
+        """
+        try:
+            result = os.popen("snmpget -OvQ -v" + self._version + " -c " +
+                    self._community + " " + self._dest_host + " " +
+                    oid).read().split("\n")
+        except TypeError:
+            return ()
 
+        return tuple(result)
 
 if __name__ == "__main__":
     from optparse import OptionParser
@@ -54,5 +70,5 @@ if __name__ == "__main__":
 
     snmp = Snmpy(dest_host=options.host, community=options.community)
 
-    s = snmp.walk("hrStorage");
+    s = snmp.get(options.oid, first_value=False);
     print s
