@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import sys
-import os
+import subprocess
 import re
 
 class Snmpy(object):
@@ -40,11 +40,11 @@ class Snmpy(object):
         """
         Basic class to execute SNMPWALK
         """
-        result = os.popen("snmpwalk -Os -v" + self._version + " -c " +
-            self._community + " " + self._dest_host + " " +
-            oid + " 2&>/dev/null").read().split("\n")
+        result = subprocess.Popen(("snmpwalk", "-Os", "-v", self._version, "-c",
+                self._community, self._dest_host, oid), stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE).stdout.read().split("\n")
         
-        return self._filter(result, only_value)
+        return self._filter(result, first_value)
 
 
     def get(self, oid, first_value=True):
@@ -52,9 +52,9 @@ class Snmpy(object):
         Basic class to execute SNMPGET
         """
         try:
-            result = os.popen("snmpget -OvQ -v" + self._version + " -c " +
-                    self._community + " " + self._dest_host + " " +
-                    oid).read().split("\n")
+            result = subprocess.Popen(("snmpget", "-OvQ", "-v", self._version,
+                    "-c", self._community, self._dest_host, oid),
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read().split("\n")
         except TypeError:
             return ()
 
@@ -70,5 +70,5 @@ if __name__ == "__main__":
 
     snmp = Snmpy(dest_host=options.host, community=options.community)
 
-    s = snmp.get(options.oid, first_value=False);
+    s = snmp.walk(options.oid, first_value=True);
     print s
