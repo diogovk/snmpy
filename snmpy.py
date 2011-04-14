@@ -24,7 +24,7 @@ class Snmpy(object):
             pattern = re.compile('(?P<group>\w+)\.(?P<index>\d+) = (?P<type>\w+): (?P<value>[\:\/\w]+)')
         else:
             pattern = re.compile('(?P<group>\w+)\.(?P<index>\d+) = (?P<type>\w+): (?P<value>.+)')
-    
+        
         for i in range(len(text)):
             line_search = pattern.search(text[i])
             try:
@@ -38,7 +38,7 @@ class Snmpy(object):
 
     def walk(self, oid, first_value=True):
         """
-        Basic class to execute SNMPWALK
+        Method to execute SNMPWALK
         """
         result = subprocess.Popen(("snmpwalk", "-Os", "-v", self._version, "-c",
                 self._community, self._dest_host, oid), stdout=subprocess.PIPE,
@@ -49,18 +49,20 @@ class Snmpy(object):
 
     def get(self, oid, first_value=True):
         """
-        Basic class to execute SNMPGET
+        Method to execute SNMPGET
         """
         try:
-            result = subprocess.Popen(("snmpget", "-OvQ", "-v", self._version,
+            result = subprocess.Popen(("snmpget", "-Os", "-v", self._version,
                     "-c", self._community, self._dest_host, oid),
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read().split("\n")
         except TypeError:
             return ()
-
-        return tuple(result)
+        
+        return self._filter(result, first_value)
 
 if __name__ == "__main__":
+    """ Main created to tests """
+
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option("-H", "--host", dest="host", help="Device address")
@@ -70,5 +72,5 @@ if __name__ == "__main__":
 
     snmp = Snmpy(dest_host=options.host, community=options.community)
 
-    s = snmp.walk(options.oid, first_value=True);
+    s = snmp.get(options.oid, first_value=True);
     print s
