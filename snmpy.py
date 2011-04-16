@@ -56,21 +56,65 @@ class Snmpy(object):
                     "-c", self._community, self._dest_host, oid),
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read().split("\n")
         except TypeError:
-            return ()
+            return {}
         
         return self._filter(result, first_value)
+
+class NetworkInterfaces(Snmpy):
+    """
+    Class to get all the information to a specific interface
+    """
+    
+    def __init__(self, *args, **kwargs):
+        super(NetworkInterfaces, self).__init__(*args, **kwargs)
+        self._ifaces = self.walk("ifDescr", first_value=False)
+        self._all_elements = {'status' : 'ifOperStatus', 'speed' : 'ifSpeed',
+                'in_oct' : 'ifInOctets', 'in_discards' : 'ifInDiscards',
+                'in_errors' : 'ifInErrors', 'out_oct' : 'ifOutOctets',
+                'out_discards' : 'ifOutDiscards', 'out_errors' : 'ifOutErrors'}
+    
+    def _get_the_iface(self, iface):
+        """
+        search the spefic interface
+        """
+        for i in self._ifaces:
+            if self._ifaces[i]['value'] == iface:
+                self._my_iface = self._ifaces[i]
+                return True
+
+        return False
+
+    def _get_all_elements(self):
+        """
+        get all information from interface
+        """
+        iface = {}
+        index = self._my_iface['index']
+        for i in self._all_elements:
+            value = self.get(self._all_elements[i] + "." + index)
+            iface[i] = value[0]['value']
+            
+        return iface
+
+    def get_iface_infs(self, iface):
+        if not self._get_the_iface(iface):
+            raise AttributeError("Interface not found")
+
+        return self._get_all_elements()
+
 
 if __name__ == "__main__":
     """ Main created to tests """
 
     from optparse import OptionParser
     parser = OptionParser()
-    parser.add_option("-H", "--host", dest="host", help="Device address")
-    parser.add_option("-C", "--community", dest="community", help="Community to be access")
+    parser.add_option("-H", "--host", dest="host", help="Device address",
+            default="127.0.0.1")
+    parser.add_option("-C", "--community", dest="community", default="public",
+            help="Community to be access")
     parser.add_option("-O", "--oid", dest="oid", help="OID to consult")
     (options, args) = parser.parse_args()
 
-    snmp = Snmpy(dest_host=options.host, community=options.community)
+    snmp = NetworkInterfaces(dest_host=options.host, community=options.community)
+    print snmp.get_iface_infs(options.oid)
 
-    s = snmp.get(options.oid, first_value=True);
-    print s
