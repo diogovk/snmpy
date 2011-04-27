@@ -1,9 +1,12 @@
 #! /usr/bin/env python
 
 import sys
-import subprocess
-import re
+import time
+import pickle
+from sys import exit
 from snmpy import NetworkInterfaces
+
+TMP_DIR = "/tmp/"
 
 class SnmpyIface(NetworkInterfaces):
     """
@@ -12,8 +15,51 @@ class SnmpyIface(NetworkInterfaces):
 
     def __init__(self, *args, **kwargs):
         super(SnmpyIface, self).__init__(*args, **kwargs)
-        
 
+    def _update_file(self, iface, infs):
+        iface_s = iface.replace(" ","_").replace("/","_")        
+        first = False;
+        infs["name"] = iface
+        infs["time"] = int(time.time())
+        try:
+            with open(TMP_DIR + 'history_'  + iface_s + '_' + self._dest_host + '.pickle',
+                    'rb') as f:
+                history = pickle.load(f)
+                del history[5:]
+        except IOError:
+            history = []
+            first = True
+        else:
+            f.close()
+
+        history.insert(0,infs)
+        with open(TMP_DIR + 'history_' + iface_s + '_' + self._dest_host +
+                '.pickle', 'wb') as f:
+            pickle.dump(history,f)
+        if first:
+            print "store history of iface"
+            if infs["status"] == "up":
+                exit(0)
+            else:
+                exit(3)
+        return history
+        
+    def get_iface(self, iface):
+        infs = self.get_iface_infs(iface)
+        values = self._update_file(iface, infs)
+        return {"in" :float(values[0]["in_oct"]) - float(values[1]["in_oct"]), 
+                "out" : float(values[0]["out_oct"])  - float(values[1]["out_oct"]), 
+                "in_discards" : float(values[0]["in_discards"]) - 
+                float(values[1]["in_discards"]),
+                "out_discards" : float(values[0]["out_discards"]) -
+                float(values[1]["out_discards"]), 
+                "in_errors" : float(values[0]["in_errors"]) - 
+                float(values[1]["in_errors"]), 
+                "out_errors" : float(values[0]["out_errors"]) - 
+                float(values[1]["out_errors"]), 
+                "speed" : values[0]["speed"], 
+                "name" : values[0]["name"] }
+        
 if __name__ == "__main__":
     """
     Get all parameters and math the result
@@ -42,4 +88,4 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
 
     r = SnmpyIface(dest_host=options.host, community=options.community)
-    print r.get_iface_infs(options.iface)
+    print r.get_iface(options.iface)
