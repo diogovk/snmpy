@@ -58,7 +58,7 @@ class SnmpyIface(NetworkInterfaces):
                 "out_errors" : float(values[0]["out_errors"]) - 
                 float(values[1]["out_errors"]), 
                 "time" : values[0]["time"] - values[1]["time"],
-                "speed" : int(values[0]["speed"]), 
+                "speed" : float(values[0]["speed"]), 
                 "name" : values[0]["name"], 
                 "status" : infs["status"]}
         
@@ -132,6 +132,9 @@ if __name__ == "__main__":
         warning = False
         myiface = options.iface
         args = snmp.validate_args(warning = options.warning, critical = options.critical)  
+        if res["speed"] == 0:
+            res["speed"] = options.speed;
+
         val = {"in" : ((res["in"] / res["time"]) * 100) / res["speed"],
           "out" : ((res["out"] / res["time"]) * 100) / res["speed"],
           "in_discards" : res["in_discards"] / res["time"],
