@@ -10,10 +10,10 @@ and communication protocol SNMP (www.net-snmp.org) as transport.
 2. Roadmap
 	version 0.1 - The core
 	version 0.2 - Iface plugin
-	version 0.3 - Memory plugin
+	version 0.3 - DiskIO plugin
 	version 0.4 - Disk Plugin
-	version 0.5 - LaLoad/CPU Plugin
-	version 0.6 - DiskIO plugin
+	version 0.5 - Memory Plugin
+	version 0.6 - Lalod/CPU plugin
 	version 0.7 - process (memory use, number of process and cpu usage) plugin
 	version 0.8 - LMSensors Plugin
 	version 0.9 - printer plugin
