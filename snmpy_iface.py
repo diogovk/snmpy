@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 #! /usr/bin/env python
 
 import sys
@@ -7,6 +8,7 @@ from sys import exit
 from snmpy import NetworkInterfaces
 
 TMP_DIR = "/tmp/"
+WINDOW_TIME = 20
 
 class SnmpyIface(NetworkInterfaces):
     """
@@ -25,7 +27,7 @@ class SnmpyIface(NetworkInterfaces):
             with open(TMP_DIR + 'history_'  + iface_s + '_' + self._dest_host + '.pickle',
                     'rb') as f:
                 history = pickle.load(f)
-                del history[5:]
+                del history[50:]
         except IOError:
             history = []
             first = True
@@ -37,7 +39,7 @@ class SnmpyIface(NetworkInterfaces):
                 '.pickle', 'wb') as f:
             pickle.dump(history,f)
         if first:
-            print "store history of iface"
+            print "store interface history"
             if infs["status"] == "up":
                 exit(0)
             else:
@@ -45,23 +47,43 @@ class SnmpyIface(NetworkInterfaces):
         return history
         
     def get_iface(self, iface):
-        infs = self.get_iface_infs(iface)
-        values = self._update_file(iface, infs)
-        return {"in" :float(values[0]["in_oct"]) - float(values[1]["in_oct"]), 
-                "out" : float(values[0]["out_oct"])  - float(values[1]["out_oct"]), 
-                "in_discards" : float(values[0]["in_discards"]) - 
-                float(values[1]["in_discards"]),
-                "out_discards" : float(values[0]["out_discards"]) -
-                float(values[1]["out_discards"]), 
-                "in_errors" : float(values[0]["in_errors"]) - 
-                float(values[1]["in_errors"]), 
-                "out_errors" : float(values[0]["out_errors"]) - 
-                float(values[1]["out_errors"]), 
-                "time" : values[0]["time"] - values[1]["time"],
-                "speed" : float(values[0]["speed"]), 
-                "name" : values[0]["name"], 
-                "status" : infs["status"]}
+        try:
+            infs = self.get_iface_infs(iface)
+        except AttributeError:
+            print "Interface not found"
+            exit(2)
         
+        values = self._update_file(iface, infs)
+        actual_value = values[0];
+        old_value = None;
+        for v in values:
+            if (values[0]["time"] - v["time"]) >= WINDOW_TIME:
+                old_value = v
+                break
+
+        if not old_value:
+            print "store interface history"
+            if actual_value["status"] == "up":
+                exit(0);
+            else:
+                exit(3);
+
+        return {"in" :float(actual_value["in_oct"]) - float(old_value["in_oct"]), 
+                "out" : float(values[0]["out_oct"])  - float(old_value["out_oct"]), 
+                "in_discards" : float(actual_value["in_discards"]) - 
+                float(old_value["in_discards"]),
+                "out_discards" : float(actual_value["out_discards"]) -
+                float(old_value["out_discards"]), 
+                "in_errors" : float(actual_value["in_errors"]) - 
+                float(old_value["in_errors"]), 
+                "out_errors" : float(actual_value["out_errors"]) - 
+                float(old_value["out_errors"]), 
+                "time" : actual_value["time"] - old_value["time"],
+                "speed" : float(actual_value["speed"]), 
+                "name" : actual_value["name"], 
+                "status" : infs["status"]}
+
+                
     def validate_args(self, warning, critical):
         warning_args = [int(i) for i in warning.split(',')]
         critical_args = [int(i) for i in critical.split(',')]
@@ -137,10 +159,11 @@ if __name__ == "__main__":
 
         val = {"in" : ((res["in"] / res["time"]) * 100) / res["speed"],
           "out" : ((res["out"] / res["time"]) * 100) / res["speed"],
-          "in_discards" : res["in_discards"] / res["time"],
-          "in_errors" : res["in_errors"] / res["time"],
-          "out_discards" : res["out_discards"] / res["time"],
-          "out_errors" : res["out_errors"] / res["time"]}
+          "in_discards" : res["in_discards"],
+          "in_errors" : res["in_errors"],
+          "out_discards" : res["out_discards"],
+          "out_errors" : res["out_errors"]
+          }
         result = ""
         if val["in"] > args["in"]["warning"] \
           and val["in"] < args["in"]["critical"]:
