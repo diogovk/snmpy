@@ -6,6 +6,7 @@ import time
 import pickle
 from sys import exit
 from snmpy import NetworkInterfaces
+from os import system
 
 TMP_DIR = "/tmp/"
 WINDOW_TIME = 20
@@ -26,8 +27,15 @@ class SnmpyIface(NetworkInterfaces):
         try:
             with open(TMP_DIR + 'history_'  + iface_s + '_' + self._dest_host + '.pickle',
                     'rb') as f:
-                history = pickle.load(f)
-                del history[50:]
+                try:
+                    history = pickle.load(f)
+                    del history[50:]
+                except EOFError:
+                    print "Error to load history file, restarting the process"
+                    system("rm -f "+TMP_DIR+"history_diskIO_"+disk_s+"_"+
+                            self._dest_host+".pickle")
+                    exit(3)
+
         except IOError:
             history = []
             first = True
@@ -52,6 +60,12 @@ class SnmpyIface(NetworkInterfaces):
         except AttributeError:
             print "Interface not found"
             exit(2)
+        except ValueError:
+            print "Destination device not found or SNMP is not present"
+            exit(3)
+        except:
+            print "unknown error"
+            exit(3)
         
         values = self._update_file(iface, infs)
         actual_value = values[0];
