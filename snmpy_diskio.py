@@ -163,6 +163,13 @@ if __name__ == "__main__":
             "Reads": res["reads"] / res["time"],
             "Writes": res["writes"] / res["time"],
             "TIO": (res["reads"] +  res["writes"]) / res["time"]}
+
+    if val["Reads"] < 0 or val["Writes"] < 0 or val["NWritten"] < 0\
+            or val["NRead"] <  0 or val["TIO"] < 0:
+            disk_s = options.device.replace(" ","_").replace("/","_")
+            system("rm -f "+TMP_DIR+"history_diskIO_"+disk_s+"_"+
+            options.host+".pickle")
+            res = snmp.get_disk(options.device)
     
     if val["Reads"] >= args["Reads"]["warning"] \
         and val["Reads"] < args["Reads"]["critical"]:
