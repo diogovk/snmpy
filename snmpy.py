@@ -77,12 +77,15 @@ class NetworkInterfaces(Snmpy):
         """
         search the spefic interface
         """
-        for i in self._ifaces:
-            if self._ifaces[i]['value'] == iface:
-                self._my_iface = self._ifaces[i]
-                return True
+        if len(self._ifaces) < 1:
+            raise ValueError("Destination host is timed out")
+        else:
+            for i in self._ifaces:
+                if self._ifaces[i]['value'] == iface:
+                    self._my_iface = self._ifaces[i]
+                    return True
 
-        return False
+            return False
 
     def _get_all_elements(self):
         """
@@ -122,7 +125,7 @@ class DiskIO(Snmpy):
         search the especific disk information
         """
         if len(self._disks_index) < 1:
-                raise ValueError("Destination host is Timed out")
+            raise ValueError("Destination host is Timed out")
         else:
             for i in self._disks_index:
                 if self._disks_index[i]['value'] == disk:
