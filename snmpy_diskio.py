@@ -131,6 +131,8 @@ if __name__ == "__main__":
         NR = MB/s Read 
         NW = MB/s written 
         TIO = Total IO 
+        
+        eg: %prog -d [device disk] -w R,W,NR,NW[,TIO] -c R,W,MR,NW[,TIO] -H [device address] -C [SNMP community]
     """,version="SNMPY version 0.3")
     parser.add_option("-d","--device", dest="device", default="sda",
             help="device disk to be constulted")

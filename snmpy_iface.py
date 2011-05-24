@@ -132,7 +132,18 @@ if __name__ == "__main__":
     """
 
     from optparse import OptionParser
-    parser = OptionParser(version="0.2")
+    parser = OptionParser(usage = """
+        in = In octets
+        out = Out octets
+        inD = In Discards
+        outD = Out Discards
+        inE = In Error
+        outE = Out Error
+        W = Warning values
+        C = Critical values
+
+        eg: %prog -i [device iface] -w inW,outW,inDW,outDW,inEW,outEW -c inC,outC,inDC,outDC,inEC,outEC -H [device address] -C [SNMP community]
+    """,version="SNMPY version 0.2")
     parser.add_option("-i","--iface", dest="iface", default="eth0", 
             help="Network Iface to be a consulted")
     parser.add_option("-H", "--host", dest="host",default="127.0.0.1", 
