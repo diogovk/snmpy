@@ -97,8 +97,59 @@ class NetworkInterfaces(Snmpy):
         return iface
 
     def get_iface_infs(self, iface):
+        """
+        Route the subroutines and return all information
+        """
         if not self._get_the_iface(iface):
             raise AttributeError("Interface not found")
+
+        return self._get_all_elements()
+
+
+class DiskIO(Snmpy):
+    """
+    Class to get all information about diskIO data
+    """
+    def __init__(self, *args, **kwargs):
+        super(DiskIO, self).__init__(*args, **kwargs)
+        self._disks_index = self.walk("diskIODevice")
+        self._all_elements = {"NRead": "diskIONRead", "NWrite":
+                "diskIONWritten", "Reads": "diskIOReads", "Writes":
+                "diskIOWrites"}
+        
+    def _get_the_disk(self, disk):
+        """
+        search the especific disk information
+        """
+        if len(self._disks_index) < 1:
+                raise ValueError("Destination host is Timed out")
+        else:
+            for i in self._disks_index:
+                if self._disks_index[i]['value'] == disk:
+                    self._my_disk = self._disks_index[i]
+                    return True
+
+            return False
+
+    def _get_all_elements(self):
+        """
+        Get all information (snmpget) of especific disk
+        """
+        disk = {}
+        index = self._my_disk['index']
+        for i in self._all_elements:
+            value = self.get(self._all_elements[i] + "." + index)
+            disk[i] = value[0]['value']
+
+        return disk
+
+    def get_diskIO_infs(self, disk):
+        """
+        Route the subroutines and return all information necessary to MB/IO
+        read and write calc
+        """
+        if not self._get_the_disk(disk):
+            raise AttributeError("Disk label not found")
 
         return self._get_all_elements()
 
@@ -115,6 +166,6 @@ if __name__ == "__main__":
     parser.add_option("-O", "--oid", dest="oid", help="OID to consult")
     (options, args) = parser.parse_args()
 
-    snmp = NetworkInterfaces(dest_host=options.host, community=options.community)
-    print snmp.get_iface_infs(options.oid)
+    snmp = DiskIO(dest_host=options.host, community=options.community)
+    print snmp.get_diskIO_infs(options.oid)
 
