@@ -5,6 +5,7 @@ import time
 import pickle
 from sys import exit
 from snmpy import DiskIO
+from os import system
 
 TMP_DIR = "/tmp/"
 WINDOW_TIME = 20
@@ -25,8 +26,15 @@ class SnmpyDiskIO(DiskIO):
         try:
             with open(TMP_DIR + 'history_diskIO_' + disk_s + '_' +
                     self._dest_host + '.pickle', 'rb') as f:
-                history = pickle.load(f)
-                del history[50:]
+                try:
+                    history = pickle.load(f)
+                    del history[50:]
+                except EOFError:
+                    print "Error to load hitory file, restarting the process"
+                    system("rm -f "+TMP_DIR+"history_diskIO_"+disk_s+"_"+
+                            self._dest_host+".pickle")
+                    exit(3)
+
         except IOError:
             history = []
             first = True
@@ -107,7 +115,7 @@ class SnmpyDiskIO(DiskIO):
         return {"Reads" : {"warning": warning_args[0], "critical":
             critical_args[0]}, "Writes": {"warning": warning_args[1],
             "critical": critical_args[1]}, "NRead":{"warning":warning_args[2],
-            "critical": critical_args[2]}, "NWritten": {"warning":
+            "critical": critical_args[2]}, "NWritten": {"warning": 
             warning_args[3], "critical": critical_args[3]}, "TIO": {"warning":
             warning_args[4], "critical":critical_args[4]},"TIO_is_defined":TIO}
 
@@ -148,8 +156,8 @@ if __name__ == "__main__":
     res = snmp.get_disk(options.device)
     args = snmp.validate_args(warning=options.warning,
             critical=options.critical)
-    val = { "NRead" : (res["NRead"] / res["time"]) / 1024,
-            "NWritten": (res["NWritten"] / res["time"]) / 1024,
+    val = { "NRead" : ((res["NRead"] / res["time"]) / 1024) / 1024,
+            "NWritten": ((res["NWritten"] / res["time"]) / 1024) / 1024,
             "Reads": res["reads"] / res["time"],
             "Writes": res["writes"] / res["time"],
             "TIO": (res["reads"] +  res["writes"]) / res["time"]}
@@ -190,9 +198,9 @@ if __name__ == "__main__":
         critical = True
 
     if args["TIO_is_defined"]:
-        print "READ = IO: %.2f, MB/s: %.2f WRITE = IO: %.2f, MB/s: %.2f TIO = %.2f | 'reads_io'=%.2f 'NRead'=%.2f 'writes_io'=%.2f 'NWritten'=%.2f 'total_io'=%.2f" % (val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["TIO"], val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["TIO"])
+        print "READ = IO: %.2f, MB/s: %.2f - WRITE = IO: %.2f, MB/s: %.2f - TIO = %.2f | 'reads_io'=%.2f 'NRead'=%.2f 'writes_io'=%.2f 'NWritten'=%.2f 'total_io'=%.2f" % (val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["TIO"], val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["TIO"])
     else:
-        print "READ = IO: %.2f, MB/s: %.2f WRITE = IO: %.2f, MB/s: %.2f | 'reads_io'=%.2f 'NRead'=%.2f 'writes_io'=%.2f 'NWritten'=%.2f" % (val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["Reads"], val["NRead"], val["Writes"], val["NWritten"])
+        print "READ = IO: %.2f, MB/s: %.2f - WRITE = IO: %.2f, MB/s: %.2f | 'reads_io'=%.2f 'NRead'=%.2f 'writes_io'=%.2f 'NWritten'=%.2f 'total_io'=0.00" % (val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["Reads"], val["NRead"], val["Writes"], val["NWritten"])
 
     if critical:
         exit(2)
