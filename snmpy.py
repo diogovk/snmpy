@@ -116,8 +116,8 @@ class DiskIO(Snmpy):
     def __init__(self, *args, **kwargs):
         super(DiskIO, self).__init__(*args, **kwargs)
         self._disks_index = self.walk("diskIODevice")
-        self._all_elements = {"NRead": "diskIONRead", "NWrite":
-                "diskIONWritten", "Reads": "diskIOReads", "Writes":
+        self._all_elements = {"NRead": "diskIONReadX", "NWrite":
+                "diskIONWrittenX", "Reads": "diskIOReads", "Writes":
                 "diskIOWrites"}
         
     def _get_the_disk(self, disk):
