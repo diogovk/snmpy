@@ -95,8 +95,11 @@ class NetworkInterfaces(Snmpy):
         index = self._my_iface['index']
         for i in self._all_elements:
             value = self.get(self._all_elements[i] + "." + index)
-            iface[i] = value[0]['value']
-            
+            try:
+                iface[i] = value[0]['value']
+            except KeyError:
+                iface[i] = 0
+
         return iface
 
     def get_iface_infs(self, iface):
