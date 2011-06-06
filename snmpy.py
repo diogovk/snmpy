@@ -62,7 +62,7 @@ class Snmpy(object):
 
     def get_all_elements(self, index):
         """
-        get all information from interface
+        get all information for specific object
         """
         values = {}
         for i in self._all_elements:
