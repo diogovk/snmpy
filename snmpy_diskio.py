@@ -113,8 +113,8 @@ class SnmpyDiskIO(DiskIO):
                     print "Total IO warning >= critical"
                 exit(3)
         return {"Reads" : {"warning": warning_args[0], "critical":
-            critical_args[0]}, "Writes": {"warning": warning_args[1],
-            "critical": critical_args[1]}, "NRead":{"warning":warning_args[2],
+            critical_args[0]}, "NRead": {"warning": warning_args[1],
+            "critical": critical_args[1]}, "Writes":{"warning":warning_args[2],
             "critical": critical_args[2]}, "NWritten": {"warning": 
             warning_args[3], "critical": critical_args[3]}, "TIO": {"warning":
             warning_args[4], "critical":critical_args[4]},"TIO_is_defined":TIO}
@@ -207,9 +207,9 @@ if __name__ == "__main__":
         critical = True
 
     if args["TIO_is_defined"]:
-        print "READ = IO: %.2f, MB/s: %.2f - WRITE = IO: %.2f, MB/s: %.2f - TIO = %.2f | 'reads_io'=%.2f 'NRead'=%.2f 'writes_io'=%.2f 'NWritten'=%.2f 'total_io'=%.2f" % (val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["TIO"], val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["TIO"])
+        print "READ = IO: %.2f, MB/s: %.2f - WRITE = IO: %.2f, MB/s: %.2f - Total IO = %.2f | 'reads_io'=%.2f;%.2f;%.2f;0;%.2f 'NRead'=%.2f;%.2f;%.2f;0;%.2f 'writes_io'=%.2f;%.2f;%.2f;0;%.2f 'NWritten'=%.2f;%.2f;%.2f;0;%.2f 'total_io'=%.2f;%.2f;%.2f;0;%.2f" % (val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["TIO"], val["Reads"], args["Reads"]["warning"], args["Reads"]["critical"], args["Reads"]["critical"], val["NRead"], args["NRead"]["warning"], args["NRead"]["critical"], args["NRead"]["critical"], val["Writes"], args["Writes"]["warning"], args["Writes"]["critical"], args["Writes"]["critical"], val["NWritten"], args["NWritten"]["warning"], args["NWritten"]["critical"], args["NWritten"]["critical"], val["TIO"],args["TIO"]["warning"], args["TIO"]["critical"], args["TIO"]["critical"])
     else:
-        print "READ = IO: %.2f, MB/s: %.2f - WRITE = IO: %.2f, MB/s: %.2f | 'reads_io'=%.2f 'NRead'=%.2f 'writes_io'=%.2f 'NWritten'=%.2f 'total_io'=0.00" % (val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["Reads"], val["NRead"], val["Writes"], val["NWritten"])
+        print "READ = IO: %.2f, MB/s: %.2f - WRITE = IO: %.2f, MB/s: %.2f | 'reads_io'=%.2f;%.2f;%.2f;0;%.2f 'NRead'=%.2f;%.2f;%.2f;0;%.2f 'writes_io'=%.2f;%.2f;%.2f;0;%.2f 'NWritten'=%.2f;%.2f;%.2f;0;%.2f" % (val["Reads"], val["NRead"], val["Writes"], val["NWritten"], val["Reads"], args["Reads"]["warning"], args["Reads"]["critical"], args["Reads"]["critical"], val["NRead"], args["NRead"]["warning"], args["NRead"]["critical"], args["NRead"]["critical"], val["Writes"], args["Writes"]["warning"], args["Writes"]["critical"], args["Writes"]["critical"], val["NWritten"], args["NWritten"]["warning"], args["NWritten"]["critical"], args["NWritten"]["critical"])
 
     if critical:
         exit(2)
