@@ -60,6 +60,21 @@ class Snmpy(object):
         
         return self._filter(result, first_value)
 
+    def get_all_elements(self, index):
+        """
+        get all information from interface
+        """
+        values = {}
+        for i in self._all_elements:
+            value = self.get(self._all_elements[i] + "." + index)
+            try:
+                values[i] = value[0]['value']
+            except KeyError:
+                values[i] = 0
+
+        return values
+
+
 class NetworkInterfaces(Snmpy):
     """
     Class to get all the information to a specific interface
@@ -87,21 +102,6 @@ class NetworkInterfaces(Snmpy):
 
             return False
 
-    def _get_all_elements(self):
-        """
-        get all information from interface
-        """
-        iface = {}
-        index = self._my_iface['index']
-        for i in self._all_elements:
-            value = self.get(self._all_elements[i] + "." + index)
-            try:
-                iface[i] = value[0]['value']
-            except KeyError:
-                iface[i] = 0
-
-        return iface
-
     def get_iface_infs(self, iface):
         """
         Route the subroutines and return all information
@@ -109,7 +109,7 @@ class NetworkInterfaces(Snmpy):
         if not self._get_the_iface(iface):
             raise AttributeError("Interface not found")
 
-        return self._get_all_elements()
+        return self.get_all_elements(self._my_iface["index"])
 
 
 class DiskIO(Snmpy):
@@ -137,17 +137,6 @@ class DiskIO(Snmpy):
 
             return False
 
-    def _get_all_elements(self):
-        """
-        Get all information (snmpget) of especific disk
-        """
-        disk = {}
-        index = self._my_disk['index']
-        for i in self._all_elements:
-            value = self.get(self._all_elements[i] + "." + index)
-            disk[i] = value[0]['value']
-
-        return disk
 
     def get_diskIO_infs(self, disk):
         """
@@ -157,7 +146,19 @@ class DiskIO(Snmpy):
         if not self._get_the_disk(disk):
             raise AttributeError("Disk label not found")
 
-        return self._get_all_elements()
+        return self.get_all_elements(self._my_disk["index"])
+
+
+class DiskStorage(Snmpy):
+    """
+    class to get all information of disk Storage
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(DiskStorage, self).__init__(*args, **kwargs)
+        self._disks_index = self.walk("hrStorageDescr")
+        self._all_elements = {"used": "hrStorageUsed", "size": "hrStorageSize",
+                "units": "hrStorageAllocationUnits", "type": "hrStorageType"}
 
 
 if __name__ == "__main__":
