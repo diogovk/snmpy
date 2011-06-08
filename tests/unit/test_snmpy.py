@@ -1,10 +1,10 @@
 import fudge
-import unittest
+import unittest2
 
 from snmpy import Snmpy
 
 
-class SnmpyTest(unittest.TestCase):
+class SnmpyTest(unittest2.TestCase):
     def setUp(self):
         self.dest_host = '127.0.0.1'
         self.community = 'public'
