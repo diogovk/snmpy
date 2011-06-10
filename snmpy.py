@@ -47,6 +47,23 @@ class Snmpy(object):
 
         return result
 
+    def _reorder_to_dict(self, elements):
+        """
+        Regroups SNMPWALK result and get element details
+        """
+        response = {}
+
+        for i in self.walk:
+            elm = i['value']
+            index = i['index']
+            response.setdefault(elm, {})
+
+            for j in elements:
+                value = self.get(elements[j] + '.' + index)
+                response[elm][j] = value[0]['value']
+
+        return response
+
     def walk(self, oid, first_value=True):
         """
         Executes SNMPWALK to read values from SNMP.
@@ -73,7 +90,6 @@ class NetworkInterfaces(Snmpy):
     """
     Specific SNMP instructions to get iface informations.
     """
-
     oid = 'ifDescr'
     _all_elements = {
         'status': 'ifOperStatus',
@@ -91,32 +107,42 @@ class NetworkInterfaces(Snmpy):
 
         # Executes SNMPWALK with specific OID to grab ifaces information
         self.walk = self.walk(self.oid, first_value=False)
-        self._ifaces = self._get_ifaces()
-
-    def _get_ifaces(self):
-        """
-        Regroups SNMPWALK result and get iface details.
-        """
-
-        ifaces = {}
-
-        for i in self.walk:
-            iface = i['value']
-            index = i['index']
-            ifaces.setdefault(iface, {})
-
-            for j in self._all_elements:
-                value = self.get(self._all_elements[j] + '.' + index)
-                ifaces[iface][j] = value[0]['value']
-
-        return ifaces
+        self._ifaces = self._reorder_to_dict(self._all_elements)
 
     def __getitem__(self, items):
         """
         Adds dict behaviour to NetworkInterfaces instances.
         """
-
         if type(items) != str or items not in self._ifaces:
-            raise KeyError
+            raise KeyError('Network interface not found')
 
         return self._ifaces[items]
+
+
+class DiskIO(Snmpy):
+    """
+    Specific SNMP instructions to get all information about diskIO.
+    """
+    oid = 'diskIODevice'
+    _all_elements = {
+        'NRead': 'diskIONRead',
+        'NWrite': 'diskIONWritten',
+        'Reads': 'diskIOReads',
+        'Writes': 'diskIOWrites',
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(DiskIO, self).__init__(*args, **kwargs)
+
+        # Executes SNMPWALK with specific OID to grab diskio information
+        self.walk = self.walk(self.oid)
+        self._disksio = self._reorder_to_dict(self._all_elements)
+
+    def __getitem__(self, items):
+        """
+        Adds dict behaviour to DiskIO instances.
+        """
+        if type(items) != str or items not in self._disksio:
+            raise KeyError('Disk label not found')
+
+        return self._disksio[items]
