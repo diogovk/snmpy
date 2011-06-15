@@ -118,7 +118,7 @@ class SnmpyInterface(Snmpy):
         """
         response = {}
 
-        for i in self.walk:
+        for i in self.walk_result:
             elm = i['value']
             index = i['index']
             response.setdefault(elm, {})
