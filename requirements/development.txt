@@ -1,0 +1,10 @@
+distribute==0.6.19
+fudge==1.0.3
+logilab-astng==0.21.1
+logilab-common==0.55.2
+nose==1.0.0
+pep8==0.6.1
+pyflakes==0.4.0
+pylint==0.23.0
+unittest2==0.5.1
+wsgiref==0.1.2
