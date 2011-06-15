@@ -93,7 +93,7 @@ class SnmpyInterface(Snmpy):
     _first_value = True
 
     def __init__(self, *args, **kwargs):
-        if not oid or not elements:
+        if not self.oid or not self.elements:
             raise ValueError("Please, fill elements and oid attributes")
 
         super(SnmpyInterface, self).__init__(*args, **kwargs)
