@@ -157,35 +157,35 @@ class DiskIO(Snmpy):
         Adds dict behaviour to DiskIO instances.
         """
         if type(items) != str or items not in self._disksio:
-            raise KeyError('Disk label not found')
+            raise KeyError("Disk label not found")
 
         return self._disksio[items]
 
 
 class DiskStorage(Snmpy):
     """
-    class to get all information of disk Storage
+    Specific SNMP instructions to get all information about storage.
     """
+    oid = 'hrStorageDescr'
+    _all_elements = {
+        'used': 'hrStorageUsed',
+        'size': 'hrStorageSize',
+        'units': 'hrStorageAllocationUnits',
+        'type': 'hrStorageType',
+    }
 
     def __init__(self, *args, **kwargs):
         super(DiskStorage, self).__init__(*args, **kwargs)
-        self._disks_index = self.walk("hrStorageDescr")
-        self._all_elements = {"used": "hrStorageUsed", "size": "hrStorageSize",
-                "units": "hrStorageAllocationUnits", "type": "hrStorageType"}
 
+        # Executes SNMPWALK with specific OID to grap diskio information
+        self.walk = self.walk(self.oid)
+        self._disk_storage = self._reorder_to_dict(self._all_elements)
 
-if __name__ == "__main__":
-    """ Main created to tests """
+    def __getitem__(self, items):
+        """
+        Adds dict behaviour to DiskStorage instances.
+        """
+        if type(items) != str or items not in self._disk_storage:
+            raise KeyError("Storage label not found")
 
-    from optparse import OptionParser
-    parser = OptionParser()
-    parser.add_option("-H", "--host", dest="host", help="Device address",
-            default="127.0.0.1")
-    parser.add_option("-C", "--community", dest="community", default="public",
-            help="Community to be access")
-    parser.add_option("-O", "--oid", dest="oid", help="OID to consult")
-    (options, args) = parser.parse_args()
-
-    snmp = DiskIO(dest_host=options.host, community=options.community)
-    print snmp.get_diskIO_infs(options.oid)
-
+        return self._disk_storage[items]
