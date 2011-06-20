@@ -10,13 +10,15 @@ from os import system
 TMP_DIR = "/tmp/"
 WINDOW_TIME = 20
 
-class SnmpyDiskIO(DiskIO):
+class SnmpyDiskIO(object):
     """
     snmpy plugin to calculate the diskIO (MB AND IO)
     """
 
-    def __init__(self, *args, **kwargs):
-        super(SnmpyDiskIO, self).__init__(*args, **kwargs)
+    def __init__(self, dest_host, community):
+        self.disks = DiskIO(dest_host=dest_host, community=community);
+        self._dest_host = dest_host;
+        self._community = community;
 
     def _update_file(self, disk, infs):
         disk_s = disk.replace(" ","_").replace("/","_")
@@ -54,9 +56,9 @@ class SnmpyDiskIO(DiskIO):
 
     def get_disk(self, disk):
         try:
-            infs = self.get_diskIO_infs(disk)
+            infs = self.disks[disk]
         except AttributeError:
-            print "Device disk '%s' not found" % options.device
+            print "Device disk '%s' not found" % diks
             exit(2)
         except ValueError:
             print "Destination device not found or SNMP is not present"
