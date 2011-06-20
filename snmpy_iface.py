@@ -16,8 +16,10 @@ class SnmpyIface(NetworkInterfaces):
     snmpy plugin to get Network interfaces information
     """
 
-    def __init__(self, *args, **kwargs):
-        super(SnmpyIface, self).__init__(*args, **kwargs)
+    def __init__(self, dest_host, community):
+        self.ifaces = NetworkInterfaces(dest_host=dest_host, community=community)
+        self._dest_host = dest_host
+        self._community = community
 
     def _update_file(self, iface, infs):
         iface_s = iface.replace(" ","_").replace("/","_")        
@@ -56,7 +58,7 @@ class SnmpyIface(NetworkInterfaces):
         
     def get_iface(self, iface):
         try:
-            infs = self.get_iface_infs(iface)
+            infs = self.ifaces[iface]
         except AttributeError:
             print "Interface not found"
             exit(2)
