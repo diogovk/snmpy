@@ -16,3 +16,8 @@ class NetworkInterfacesTest(unittest2.TestCase):
         # TODO: Please, make this test an unit test
         self.assertEquals(type(self.network_interfaces['lo']), dict)
         self.assertEquals(self.network_interfaces['lo']['status'], 'up')
+
+    def test_snmpy_network_infs(self):
+        #verify if all infs more problematics a correctily
+        self.assertTrue(self.network_interfaces['lo']['speed'] > 0)
+        self.assertNotEquals(self.network_interfaces['lo']['in_discards'], '')
